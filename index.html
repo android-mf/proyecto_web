@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokédex Nacional</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span class="pokeball-icon">⬤</span>
+      <span class="brand-text">Pokedex</span>
+    </div>
+    <div class="navbar-links">
+      <a onclick="showPage('home')" class="nav-link active" data-page="home">Inicio</a>
+      <a onclick="showPage('moves')" class="nav-link" data-page="moves">Movimientos</a>
+      <a onclick="showPage('items')" class="nav-link" data-page="items">items</a>
+      <a onclick="showPage('team')" class="nav-link" data-page="team">Mi Equipo</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Cambiar tema">
+      <span class="theme-icon">☀</span>
+    </button>
+  </nav>
+
+  <div id="home" class="page">
+    <div class="page-header">
+      <h1 class="page-title">mpokedex</h1>
+      <p class="page-subtitle">Explora los pokemones</p>
+    </div>
+
+    <div class="search-container">
+      <div class="search-glass">
+        <span class="search-icon">buscar</span>
+        <input
+          type="text"
+          id="buscarPokemon"
+          class="search-input"
+          placeholder="Buscar Pokémon por nombre..."
+          oninput="onSearchInput()"
+        >
+        <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none">✕</button>
+      </div>
+    </div>
+
+    <div id="catalogo" class="grid"></div>
+
+    <div class="pagination" id="pagination">
+      <button class="btn-pag" id="btnPrev" onclick="prevPage()" disabled>← Anterior</button>
+      <span class="page-info" id="pageInfo">Página 1</span>
+      <button class="btn-pag" id="btnNext" onclick="nextPage()">Siguiente →</button>
+    </div>
+  </div>
+
+  <div id="moves" class="page hidden">
+    <div class="page-header">
+      <h1 class="page-title">Movimientos</h1>
+      <p class="page-subtitle">Busca información sobre cualquier movimiento</p>
+    </div>
+    <div class="search-container">
+      <div class="search-glass">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="buscarMove" class="search-input" placeholder="Ej: flamethrower, surf..." onkeydown="if(event.key==='Enter') searchMove()">
+        <button class="search-btn-inline" onclick="searchMove()">Buscar</button>
+      </div>
+    </div>
+    <div id="moveInfo" class="detail-card-static hidden"></div>
+    <div id="pokemonList" class="pokemon-list-chips"></div>
+  </div>
+
+  <div id="items" class="page hidden">
+    <div class="page-header">
+      <h1 class="page-title">items</h1>
+      <p class="page-subtitle">Busca información sobre ítems del juego</p>
+    </div>
+    <div class="search-container">
+      <div class="search-glass">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="buscarItem" class="search-input" placeholder="Ej: potion, master-ball..." onkeydown="if(event.key==='Enter') searchItem()">
+        <button class="search-btn-inline" onclick="searchItem()">Buscar</button>
+      </div>
+    </div>
+    <div id="itemInfo" class="detail-card-static hidden"></div>
+  </div>
+
+  <div id="team" class="page hidden">
+    <div class="page-header">
+      <h1 class="page-title">Mi Equipo</h1>
+      <p class="page-subtitle">Tu equipo Pokémon (máximo 6)</p>
+    </div>
+    <div id="teamList" class="team-grid"></div>
+    <div id="teamEmpty" class="team-empty">
+      <p>Tu equipo esta vacío.</p>
+      <p>Ve a la Pokedex y agrega Pokemon a tu equipo.</p>
+    </div>
+  </div>
+
+  <div id="modal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event)">
+    <div class="modal-container">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+
+      <div class="modal-body">>
+        <div id="modalSkeleton" class="skeleton-wrapper">
+          <div class="sk sk-img"></div>
+          <div class="sk-info">
+            <div class="sk sk-title"></div>
+            <div class="sk sk-sub"></div>
+            <div class="sk sk-sub short"></div>
+            <div class="sk sk-bar"></div>
+            <div class="sk sk-bar"></div>
+            <div class="sk sk-bar"></div>
+          </div>
+        </div>
+
+        <div id="modalContent" class="modal-content hidden">
+          <div class="modal-left">
+            <div class="pokemon-number" id="modalNumber">#001</div>
+            <div class="modal-img-container">
+              <img id="modalImg" src="" alt="" class="modal-pokemon-img" loading="lazy">
+            </div>
+            <div id="modalTypes" class="modal-types"></div>
+            <div class="modal-basic-info">
+              <div class="info-item">
+                <span class="info-label">Altura</span>
+                <span class="info-value" id="modalAltura">–</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Peso</span>
+                <span class="info-value" id="modalPeso">–</span>
+              </div>
+            </div>
+            <div class="modal-abilities">
+              <h4>Habilidades</h4>
+              <div id="modalHabilidades" class="abilities-list"></div>
+            </div>
+            <button class="btn-add-team" onclick="addCurrentPokemon()" id="btnAddTeam">
+              + Agregar al equipo
+            </button>
+          </div>
+
+          <div class="modal-right">
+            <h2 class="modal-pokemon-name" id="modalName">–</h2>
+            <h3 class="stats-title">Estadísticas Base</h3>
+            <div id="modalStats" class="stats-list"></div>
+            <div class="evolutions-section">
+              <h3>Cadena de Evolución</h3>
+              <div id="modalEvoluciones" class="evolutions-chain"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
